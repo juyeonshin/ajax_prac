@@ -10,8 +10,11 @@
 
     {% if post.user %}
         <h3> 작성자 : {{ post.user }}</h3>
+        
+    
     {% else %}
         <h3> 작성자 : 알수 없음</h3>
+        
     {% endif %}
 
     {% if post.image %}
@@ -52,18 +55,18 @@
 
         {% if user in post.dislike_user_set.all %}
             <div class="alt-service-icon">
-                <i class="fas fa-heart-broken" id ="dislike-icon" style="color:red;"></i>
+                <i class="fas fa-thumbs-down" id ="dislike-icon" style="color:red;"></i>
             </div> 
     
         {% else %}
     
             <div class="alt-service-icon">
-                 <i class="far fa-heart-broken" id ="dislike-icon" style="color:red;"></i> 
+                 <i class="far fa-thumbs-down" id ="dislike-icon" style="color:red;"></i> 
             </div>
     
          {% endif %}
     
-         <span id="count-{{ post.id }}" class="alt-services-title font-alt"> 
+         <span id="count1-{{ post.id }}" class="alt-services-title font-alt"> 
             싫어요
             {% if post.dislike_count == 0 %} 
                 0개 
@@ -74,6 +77,8 @@
      </div>
     
 </div>
+
+
     
 <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 <script>
@@ -132,13 +137,13 @@
             else{
                 if (response.result == "dislike") {
                     $('#dislike-icon').removeClass();
-                    $('#dislike-icon').addClass('fas fa-heart-broken');
+                    $('#dislike-icon').addClass('fas fa-thumbs-down');
                 }
                 else {
                     $('#dislike-icon').removeClass();
-                    $('#dislike-icon').addClass('far fa-heart-broken');    
+                    $('#dislike-icon').addClass('far fa-thumb-down');    
                 }
-                $(`#count-{{ post.id }}`).html("싫어요"+response.dislike_count+"개");
+                $(`#count1-{{ post.id }}`).html("싫어요"+response.dislike_count+"개");
             }
         },
 
