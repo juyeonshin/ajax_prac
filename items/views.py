@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse 
 import json
+from django.template.loader import render_to_string
 
 
 def main(request):
@@ -26,6 +27,13 @@ def show(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
     post.view_count = post.view_count+1
     post.save()
+    user = request.user
+    context = {
+        'post':post,
+        'user':user,
+        'comments': post.comments.all().order_by('-created_at')
+    }
+    return render(request, 'items/show.html', context)
     return render(request, 'items/show.html', {'post':post})
 
 
@@ -77,3 +85,33 @@ def dislike_toggle(request, post_id):
     }
  
     return HttpResponse(json.dumps(context), content_type="application/json")
+
+@login_required
+@require_POST
+def create_comment(request, post_id):
+    user = request.user
+    post = get_object_or_404(Post, pk=post_id)
+    content = request.POST.get('content')
+    comment = Comment.objects.create(writer=user, post=post, content=content) 
+    rendered = render_to_string('comments/_comments.html', { 'comment': comment, 'user': request.user})
+
+    context = {
+		    'comment': rendered
+	}
+    return HttpResponse(json.dumps(context), content_type="application/json")
+
+@login_required
+@require_POST
+def delete_comment(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    comment_id = request.POST.get('comment_id')
+    comment = Comment.objects.get(pk = comment_id)
+
+    if request.user == comment.writer or request.user.level == '1' or request.user.level == '0':
+        comment.deleted = True
+        comment.save()
+        post.save()
+        data = {
+            'comment_id': comment_id,
+        }
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type = "application/json")
